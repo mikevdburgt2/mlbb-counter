@@ -10,9 +10,9 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // Tijdelijk hardcoded data om build te laten slagen
-  const favorites = [];
-  const builds = [];
+  // Tijdelijk hardcoded om build te laten slagen
+  const favorites: any[] = [];
+  const builds: any[] = [];
 
   return <DashboardContent favorites={favorites} initialBuilds={builds} user={session.user} />;
 }
