@@ -10,12 +10,12 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060c1a] text-white flex items-center justify-center p-6">
-      <div className="text-center max-w-md">
-        <h1 className="text-5xl font-black mb-4">Welcome back!</h1>
-        <p className="text-xl text-gray-400 mb-8">{session.user.name || session.user.email}</p>
-        <p className="text-gray-500">Favorites and My Builds are working locally.</p>
-        <p className="text-sm text-purple-400 mt-8">Site is now live on Vercel</p>
+    <div className="min-h-screen bg-[#060c1a] text-white p-8">
+      <div className="max-w-2xl mx-auto text-center">
+        <h1 className="text-5xl font-black mb-6">Welcome, {session.user.name || 'Player'}!</h1>
+        <p className="text-2xl text-gray-400">Your MLBB Counter Dashboard</p>
+        <p className="mt-8 text-gray-500">Favorites and My Builds are available locally.</p>
+        <p className="text-sm text-purple-400 mt-12">Site is now live on Vercel</p>
       </div>
     </div>
   );
