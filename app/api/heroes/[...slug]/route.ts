@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string[] } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ slug: string[] }> }) {
   try {
-    const slug = params.slug.join('/');
-    const externalUrl = `https://openmlbb.fastapicloud.dev/api/heroes/${slug}`;
+    const { slug } = await context.params;
+    const path = slug.join('/');
 
-    const res = await fetch(externalUrl, {
+    const externalUrl = `https://openmlbb.fastapicloud.dev/api/heroes/${path}`;
+
+    const response = await fetch(externalUrl, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    if (!res.ok) {
-      return NextResponse.json({ error: 'Hero not found' }, { status: res.status });
+    if (!response.ok) {
+      return NextResponse.json({ error: 'Hero not found' }, { status: response.status });
     }
 
-    const data = await res.json();
+    const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error('Proxy error:', error);
-    return NextResponse.json({ error: 'Failed to fetch hero data' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
   }
 }
