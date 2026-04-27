@@ -37,7 +37,13 @@
       "Bash(curl -s \"https://openmlbb.fastapicloud.dev/api/heroes/moskov\")",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); r=d['data']['records'][0]['data']; print\\('Keys:', list\\(r.keys\\(\\)\\)[:15]\\)\")",
       "Bash(grep -r \"fetchHeroes\\\\|handleQuery\" /c/Users/admin/Documents/progams --include=\"*.tsx\" --include=\"*.ts\" -n ! -path \"*/node_modules/*\")",
-      "Bash(grep -E '\\\\.\\(tsx?|jsx?\\)$')"
+      "Bash(grep -E '\\\\.\\(tsx?|jsx?\\)$')",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)",
+      "WebFetch(domain:mobile-legends.fandom.com)",
+      "WebFetch(domain:mlbb.io)",
+      "WebFetch(domain:liquipedia.net)"
     ]
   }
 }

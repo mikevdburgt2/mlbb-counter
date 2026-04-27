@@ -1,0 +1,16 @@
+-- CreateTable
+CREATE TABLE "Build" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "heroId" INTEGER NOT NULL,
+    "heroName" TEXT NOT NULL,
+    "heroHead" TEXT NOT NULL,
+    "item1" TEXT NOT NULL DEFAULT '',
+    "item2" TEXT NOT NULL DEFAULT '',
+    "item3" TEXT NOT NULL DEFAULT '',
+    "item4" TEXT NOT NULL DEFAULT '',
+    "item5" TEXT NOT NULL DEFAULT '',
+    "item6" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Build_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);

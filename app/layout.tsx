@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import Providers from './providers';
 
 export const metadata: Metadata = {
   title: 'MLBB Counter',
@@ -22,7 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           content="script-src 'self' 'unsafe-eval' 'unsafe-inline';"
         />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

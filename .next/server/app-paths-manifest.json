@@ -1,8 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/heroes/[slug]/route": "app/api/heroes/[slug]/route.js",
-  "/api/heroes/[slug]/compatibility/route": "app/api/heroes/[slug]/compatibility/route.js",
-  "/api/heroes/route": "app/api/heroes/route.js",
-  "/page": "app/page.js",
-  "/quick-test/page": "app/quick-test/page.js"
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/dashboard/page": "app/dashboard/page.js"
 }

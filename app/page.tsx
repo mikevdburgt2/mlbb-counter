@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSession, signOut } from 'next-auth/react'
+import Link from 'next/link'
 import {
   fetchHeroes, fetchHeroDetail, fetchHeroStats, heroSlug,
   HeroBasic, HeroDetail, HeroStats, CounterEntry, Skill,
 } from '@/lib/api'
+import HeartButton from '@/components/HeartButton'
 
 type Tab = 'overview' | 'counters'
 
@@ -35,6 +38,7 @@ function pct(n: number, decimals = 2) {
 }
 
 export default function Home() {
+  const { data: session } = useSession()
   const [heroes, setHeroes]           = useState<HeroBasic[]>([])
   const [heroMap, setHeroMap]         = useState<Map<number, HeroBasic>>(new Map())
   const [query, setQuery]             = useState('')
@@ -49,6 +53,7 @@ export default function Home() {
 
   const [popularHeroes, setPopularHeroes] = useState<HeroBasic[]>([])
   const [fetchError, setFetchError]       = useState<string | null>(null)
+  const [favoritedIds, setFavoritedIds]   = useState<Set<number>>(new Set())
 
   const cache  = useRef<Map<number, { detail: HeroDetail | null; stats: HeroStats | null }>>(new Map())
   const searchRef = useRef<HTMLDivElement>(null)
@@ -78,6 +83,14 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    if (!session) return
+    fetch('/api/favorites')
+      .then(r => r.ok ? r.json() : [])
+      .then((list: { heroId: number }[]) => setFavoritedIds(new Set(list.map(f => f.heroId))))
+      .catch(() => {})
+  }, [session])
+
+  useEffect(() => {
     fetchHeroes()
       .then(list => {
         console.log(`[MLBB] Loaded ${list.length} heroes from API`)
@@ -86,8 +99,6 @@ export default function Home() {
         setPopularHeroes(list.slice(0, 10))
         setHeroMap(new Map(list.map(h => [h.hero_id, h])))
         setHeroesReady(true)
-        const moskov = list.find(h => h.name.toLowerCase() === 'moskov')
-        if (moskov) loadHero(moskov)
       })
       .catch(err => {
         const msg = err instanceof Error ? err.message : String(err)
@@ -144,6 +155,25 @@ export default function Home() {
               <path d="M10 2L12.4 7.5H18L13.3 11l1.9 5.8L10 13.5l-5.2 3.3L6.7 11 2 7.5h5.6z"/>
             </svg>
             <span className="neon-logo font-black text-xl tracking-wide">MLBB Counter</span>
+            <div className="ml-auto flex items-center gap-2">
+              {session ? (
+                <>
+                  <Link href="/dashboard" className="text-xs text-purple-400 hover:text-purple-300 transition-colors font-medium px-3 py-1.5 rounded-lg border border-purple-900/40 hover:border-purple-500/40">
+                    {session.user?.name ?? 'Dashboard'}
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <Link href="/login" className="text-xs font-medium text-white px-3 py-1.5 rounded-lg transition-all" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}>
+                  Sign in
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Search */}
@@ -157,7 +187,7 @@ export default function Home() {
                 value={query}
                 onChange={e => handleQuery(e.target.value)}
                 onFocus={() => handleQuery(query)}
-                placeholder="Search hero name (e.g. Moskov, Fanny, Ling)"
+                placeholder="Search hero name (e.g. Fanny, Ling, Moskov)"
                 className="w-full bg-[#0d1624] border border-[#1e2d55] rounded-xl pl-10 pr-4 py-2.5 text-sm placeholder-gray-600 neon-focus transition-colors"
               />
               {!heroesReady && (
@@ -248,17 +278,33 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
-                {tier && (
-                  <div
-                    className="flex-shrink-0 rounded-xl px-3 py-2 text-center"
-                    style={{ background: tier.bg }}
-                  >
-                    <div className="text-2xl font-black leading-none" style={{ color: tier.color }}>
-                      {tier.label}
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  {tier && (
+                    <div
+                      className="rounded-xl px-3 py-2 text-center"
+                      style={{ background: tier.bg }}
+                    >
+                      <div className="text-2xl font-black leading-none" style={{ color: tier.color }}>
+                        {tier.label}
+                      </div>
+                      <div className="text-[10px] text-gray-500 mt-0.5">Tier</div>
                     </div>
-                    <div className="text-[10px] text-gray-500 mt-0.5">Tier</div>
-                  </div>
-                )}
+                  )}
+                  <HeartButton
+                    key={selected.hero_id}
+                    heroId={selected.hero_id}
+                    heroName={selected.name}
+                    heroHead={selected.head}
+                    initialFavorited={favoritedIds.has(selected.hero_id)}
+                    onToggle={(id, fav) =>
+                      setFavoritedIds(prev => {
+                        const next = new Set(prev)
+                        fav ? next.add(id) : next.delete(id)
+                        return next
+                      })
+                    }
+                  />
+                </div>
               </div>
 
               {/* Stats row */}
