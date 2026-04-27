@@ -1,7 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import DashboardContent from './DashboardContent';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -10,9 +9,15 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // Tijdelijk hardcoded om build te laten slagen
-  const favorites: any[] = [];
-  const builds: any[] = [];
-
-  return <DashboardContent favorites={favorites} initialBuilds={builds} user={session.user} />;
+  return (
+    <div className="min-h-screen bg-[#060c1a] text-white p-8">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold mb-4">Welcome, {session.user.name || 'Player'}!</h1>
+        <p className="text-gray-400 text-lg">Favorites & My Builds work locally.</p>
+        <p className="text-sm text-gray-500 mt-8">
+          Prisma is temporarily disabled for Vercel deployment.
+        </p>
+      </div>
+    </div>
+  );
 }
