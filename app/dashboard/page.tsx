@@ -10,13 +10,14 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060c1a] text-white p-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#060c1a] text-white p-6">
+      <div className="max-w-2xl mx-auto text-center">
         <h1 className="text-4xl font-bold mb-4">Welcome, {session.user.name || 'Player'}!</h1>
-        <p className="text-gray-400 text-lg">My Builds & Favorites are coming soon...</p>
+        <p className="text-gray-400 mb-8">Your dashboard is under construction.</p>
 
-        <div className="mt-12 text-center text-sm text-gray-500">
-          Login werkt • Favorites werken • Builds komen later
+        <div className="bg-[#0d1624] rounded-2xl p-8 border border-purple-900/30">
+          <p className="text-lg">Favorites & My Builds will be available soon.</p>
+          <p className="text-sm text-gray-500 mt-4">Thank you for testing!</p>
         </div>
       </div>
     </div>
