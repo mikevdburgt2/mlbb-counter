@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: linear-gradient(160deg, #0a1428 0%, #0f0d2a 50%, #1a1033 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #e5e7eb;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin scrollbar */
+::-webkit-scrollbar        { width: 4px; height: 4px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #2d1b5e; border-radius: 4px; }
+
+/* Neon card glow */
+.card-glow {
+  box-shadow:
+    0 0 0 1px rgba(139, 92, 246, 0.12),
+    0 4px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(139, 92, 246, 0.08);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card-glow:hover {
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.18),
+    0 0 24px rgba(139, 92, 246, 0.14),
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(34, 211, 238, 0.06);
+}
+
+/* Active tab glow */
+.tab-glow {
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.5), 0 0 28px rgba(6, 182, 212, 0.2);
+}
+
+/* Neon logo text */
+.neon-logo {
+  background: linear-gradient(135deg, #f5a623 0%, #ff6b6b 45%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(245, 166, 35, 0.55));
+}
+
+/* Neon border input focus */
+.neon-focus:focus {
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25), 0 0 12px rgba(139, 92, 246, 0.15);
+}
