@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: false,
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // Dit is de belangrijkste lijn
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -10,9 +10,6 @@ const nextConfig = {
   output: 'standalone',
   images: {
     unoptimized: true,
-  },
-  experimental: {
-    esmExternals: false,
   },
 };
 
