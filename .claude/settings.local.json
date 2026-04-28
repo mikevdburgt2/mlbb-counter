@@ -43,7 +43,10 @@
       "Bash(npx tsc *)",
       "WebFetch(domain:mobile-legends.fandom.com)",
       "WebFetch(domain:mlbb.io)",
-      "WebFetch(domain:liquipedia.net)"
+      "WebFetch(domain:liquipedia.net)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
