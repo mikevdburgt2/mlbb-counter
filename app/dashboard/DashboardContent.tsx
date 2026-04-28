@@ -1,102 +1,103 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
-import HeartButton from '@/components/HeartButton';
-import ItemSelectorModal from '@/components/ItemSelectorModal';
-import { getItemMeta } from '@/lib/mlbb-items';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import HeartButton from '@/components/HeartButton'
+import ItemSelectorModal from '@/components/ItemSelectorModal'
+import { getItemMeta } from '@/lib/mlbb-items'
 
 interface Favorite {
-  id: string;
-  heroId: number;
-  heroName: string;
-  heroHead: string;
+  id: string
+  heroId: number
+  heroName: string
+  heroHead: string
 }
 
 interface Build {
-  id: string;
-  heroId: number;
-  heroName: string;
-  heroHead: string;
-  item1: string;
-  item2: string;
-  item3: string;
-  item4: string;
-  item5: string;
-  item6: string;
+  id: string
+  heroId: number
+  heroName: string
+  heroHead: string
+  item1: string
+  item2: string
+  item3: string
+  item4: string
+  item5: string
+  item6: string
 }
 
-type DashboardTab = 'builds' | 'favourites';
+type DashboardTab = 'builds' | 'favourites'
 
-interface Props {
-  favorites: Favorite[];
-  initialBuilds: Build[];
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-}
+const EMPTY_ITEMS = ['', '', '', '', '', ''] as const
+const FAVORITES_KEY = 'mlbb_favorites'
+const BUILDS_KEY = 'mlbb_builds'
 
-const EMPTY_ITEMS = ['', '', '', '', '', ''] as const;
+type StoredFav = { heroId: number; heroName: string; heroHead: string }
 
-export default function DashboardContent({ favorites: initialFavorites, initialBuilds }: Props) {
-  const [activeTab, setActiveTab] = useState<DashboardTab>('builds');
-  const [favorites, setFavorites] = useState<Favorite[]>(initialFavorites);
-  const [builds, setBuilds] = useState<Build[]>(initialBuilds);
+export default function DashboardContent() {
+  const [activeTab, setActiveTab] = useState<DashboardTab>('builds')
+  const [favorites, setFavorites] = useState<Favorite[]>([])
+  const [builds, setBuilds] = useState<Build[]>([])
+  const [mounted, setMounted] = useState(false)
 
-  // Build form state
-  const [selectedHeroId, setSelectedHeroId] = useState<string>('');
-  const [items, setItems] = useState<string[]>([...EMPTY_ITEMS]);
-  const [saving, setSaving] = useState(false);
-  const [openSlot, setOpenSlot] = useState<number | null>(null);
+  const [selectedHeroId, setSelectedHeroId] = useState<string>('')
+  const [items, setItems] = useState<string[]>([...EMPTY_ITEMS])
+  const [openSlot, setOpenSlot] = useState<number | null>(null)
 
-  const selectedHero = favorites.find((f) => String(f.heroId) === selectedHeroId);
-
-  const handleSave = async () => {
-    if (!selectedHero) return;
-    setSaving(true);
+  useEffect(() => {
     try {
-      const res = await fetch('/api/builds', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          heroId: selectedHero.heroId,
-          heroName: selectedHero.heroName,
-          heroHead: selectedHero.heroHead,
-          item1: items[0],
-          item2: items[1],
-          item3: items[2],
-          item4: items[3],
-          item5: items[4],
-          item6: items[5],
-        }),
-      });
-      if (res.ok) {
-        const newBuild = await res.json();
-        setBuilds((prev) => [newBuild, ...prev]);
-        setSelectedHeroId('');
-        setItems([...EMPTY_ITEMS]);
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
+      const favs: StoredFav[] = JSON.parse(localStorage.getItem(FAVORITES_KEY) ?? '[]')
+      setFavorites(
+        favs.map((f) => ({
+          id: String(f.heroId),
+          heroId: f.heroId,
+          heroName: f.heroName,
+          heroHead: f.heroHead,
+        })),
+      )
+    } catch {}
+    try {
+      setBuilds(JSON.parse(localStorage.getItem(BUILDS_KEY) ?? '[]'))
+    } catch {}
+    setMounted(true)
+  }, [])
 
-  const handleDelete = async (id: string) => {
-    await fetch('/api/builds', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    setBuilds((prev) => prev.filter((b) => b.id !== id));
-  };
+  const selectedHero = favorites.find((f) => String(f.heroId) === selectedHeroId)
+
+  const handleSave = () => {
+    if (!selectedHero) return
+    const build: Build = {
+      id: Date.now().toString(),
+      heroId: selectedHero.heroId,
+      heroName: selectedHero.heroName,
+      heroHead: selectedHero.heroHead,
+      item1: items[0],
+      item2: items[1],
+      item3: items[2],
+      item4: items[3],
+      item5: items[4],
+      item6: items[5],
+    }
+    const updated = [build, ...builds]
+    localStorage.setItem(BUILDS_KEY, JSON.stringify(updated))
+    setBuilds(updated)
+    setSelectedHeroId('')
+    setItems([...EMPTY_ITEMS])
+  }
+
+  const handleDelete = (id: string) => {
+    const updated = builds.filter((b) => b.id !== id)
+    localStorage.setItem(BUILDS_KEY, JSON.stringify(updated))
+    setBuilds(updated)
+  }
 
   const handleHeartToggle = (heroId: number, favorited: boolean) => {
     if (!favorited) {
-      setFavorites((prev) => prev.filter((f) => f.heroId !== heroId));
+      setFavorites((prev) => prev.filter((f) => f.heroId !== heroId))
     }
-  };
+  }
+
+  if (!mounted) return null
 
   return (
     <div>
@@ -144,14 +145,12 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
       {/* Builds tab */}
       {activeTab === 'builds' && (
         <div className="space-y-4">
-          {/* Build form */}
           <div
             className="bg-[#0d1624] rounded-2xl border border-purple-900/40 p-4"
             style={{ boxShadow: '0 0 40px rgba(139,92,246,0.08)' }}
           >
             <div className="text-sm font-semibold text-gray-100 mb-3">New Build</div>
 
-            {/* Hero select */}
             {favorites.length === 0 ? (
               <p className="text-xs text-gray-500 mb-3">
                 Favourite a hero first to create a build.{' '}
@@ -177,7 +176,7 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
             {/* 6 item slots */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               {items.map((item, i) => {
-                const meta = item ? getItemMeta(item) : null;
+                const meta = item ? getItemMeta(item) : null
                 return (
                   <div key={i} className="relative group">
                     <button
@@ -224,13 +223,12 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
                       )}
                     </button>
 
-                    {/* Clear button */}
                     {item && (
                       <button
                         onClick={() => {
-                          const next = [...items];
-                          next[i] = '';
-                          setItems(next);
+                          const next = [...items]
+                          next[i] = ''
+                          setItems(next)
                         }}
                         className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
                         style={{ background: '#1e1030', border: '1px solid rgba(139,92,246,0.4)' }}
@@ -247,18 +245,17 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
                       </button>
                     )}
                   </div>
-                );
+                )
               })}
             </div>
 
-            {/* Item selector modal */}
             {openSlot !== null && (
               <ItemSelectorModal
                 currentItem={items[openSlot]}
                 onSelect={(name) => {
-                  const next = [...items];
-                  next[openSlot] = name;
-                  setItems(next);
+                  const next = [...items]
+                  next[openSlot] = name
+                  setItems(next)
                 }}
                 onClose={() => setOpenSlot(null)}
               />
@@ -266,18 +263,17 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
 
             <button
               onClick={handleSave}
-              disabled={!selectedHero || saving}
+              disabled={!selectedHero}
               className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
                 background: 'linear-gradient(135deg, #7c3aed, #06b6d4)',
                 boxShadow: '0 0 20px rgba(124,58,237,0.3)',
               }}
             >
-              {saving ? 'Saving…' : 'Save Build'}
+              Save Build
             </button>
           </div>
 
-          {/* Saved builds list */}
           {builds.length === 0 ? (
             <div
               className="bg-[#0d1624] rounded-2xl border border-purple-900/40 p-8 text-center"
@@ -296,7 +292,7 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
                   build.item4,
                   build.item5,
                   build.item6,
-                ].filter(Boolean);
+                ].filter(Boolean)
                 return (
                   <div
                     key={build.id}
@@ -319,7 +315,7 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
                       {itemList.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {itemList.map((item, i) => {
-                            const meta = getItemMeta(item);
+                            const meta = getItemMeta(item)
                             return (
                               <span
                                 key={i}
@@ -333,7 +329,7 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
                                 {meta && <span className="text-[11px]">{meta.badge || '⚔️'}</span>}
                                 <span className={meta ? '' : 'text-purple-300'}>{item}</span>
                               </span>
-                            );
+                            )
                           })}
                         </div>
                       ) : (
@@ -348,7 +344,7 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
                       ×
                     </button>
                   </div>
-                );
+                )
               })}
             </div>
           )}
@@ -423,5 +419,5 @@ export default function DashboardContent({ favorites: initialFavorites, initialB
         </div>
       )}
     </div>
-  );
+  )
 }

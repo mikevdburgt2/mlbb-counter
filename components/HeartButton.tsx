@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useState, useEffect } from 'react'
 
 interface Props {
   heroId: number
@@ -12,45 +11,46 @@ interface Props {
   size?: 'sm' | 'md'
 }
 
-export default function HeartButton({
-  heroId,
-  heroName,
-  heroHead,
-  initialFavorited = false,
-  onToggle,
-  size = 'md',
-}: Props) {
-  const { data: session } = useSession()
-  const [favorited, setFavorited] = useState(initialFavorited)
-  const [loading, setLoading] = useState(false)
+const FAVORITES_KEY = 'mlbb_favorites'
+type StoredFav = { heroId: number; heroName: string; heroHead: string }
 
-  if (!session) return null
+function readFavs(): StoredFav[] {
+  try {
+    return JSON.parse(localStorage.getItem(FAVORITES_KEY) ?? '[]')
+  } catch {
+    return []
+  }
+}
 
-  const toggle = async (e: React.MouseEvent) => {
+export default function HeartButton({ heroId, heroName, heroHead, onToggle, size = 'md' }: Props) {
+  const [favorited, setFavorited] = useState(false)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    setFavorited(readFavs().some((f) => f.heroId === heroId))
+    setReady(true)
+  }, [heroId])
+
+  if (!ready) return null
+
+  const toggle = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (loading) return
-    setLoading(true)
-    const prev = favorited
-    setFavorited(!prev)
-    onToggle?.(heroId, !prev)
-
-    try {
-      if (prev) {
-        const res = await fetch(`/api/favorites/${heroId}`, { method: 'DELETE' })
-        if (!res.ok) throw new Error()
-      } else {
-        const res = await fetch('/api/favorites', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ heroId, heroName, heroHead }),
-        })
-        if (!res.ok) throw new Error()
+    const next = !favorited
+    setFavorited(next)
+    onToggle?.(heroId, next)
+    const favs = readFavs()
+    if (next) {
+      if (!favs.find((f) => f.heroId === heroId)) {
+        localStorage.setItem(
+          FAVORITES_KEY,
+          JSON.stringify([...favs, { heroId, heroName, heroHead }]),
+        )
       }
-    } catch {
-      setFavorited(prev)
-      onToggle?.(heroId, prev)
-    } finally {
-      setLoading(false)
+    } else {
+      localStorage.setItem(
+        FAVORITES_KEY,
+        JSON.stringify(favs.filter((f) => f.heroId !== heroId)),
+      )
     }
   }
 
@@ -59,9 +59,8 @@ export default function HeartButton({
   return (
     <button
       onClick={toggle}
-      disabled={loading}
       aria-label={favorited ? 'Remove from favourites' : 'Add to favourites'}
-      className={`flex items-center justify-center rounded-xl transition-all disabled:opacity-60 ${
+      className={`flex items-center justify-center rounded-xl transition-all ${
         size === 'sm' ? 'w-7 h-7' : 'w-9 h-9'
       } ${
         favorited
@@ -69,12 +68,7 @@ export default function HeartButton({
           : 'bg-white/5 border border-white/10 hover:bg-rose-500/10 hover:border-rose-500/30'
       }`}
     >
-      <svg
-        viewBox="0 0 24 24"
-        width={dim}
-        height={dim}
-        className={`transition-transform ${loading ? 'scale-90' : 'scale-100'}`}
-      >
+      <svg viewBox="0 0 24 24" width={dim} height={dim}>
         {favorited ? (
           <path
             fill="#f43f5e"
