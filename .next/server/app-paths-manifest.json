@@ -1,16 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/favorites/[heroId]/route": "app/api/favorites/[heroId]/route.js",
-  "/api/builds/route": "app/api/builds/route.js",
-  "/api/favorites/route": "app/api/favorites/route.js",
-  "/api/heroes/[slug]/compatibility/route": "app/api/heroes/[slug]/compatibility/route.js",
-  "/api/register/route": "app/api/register/route.js",
-  "/api/heroes/[slug]/route": "app/api/heroes/[slug]/route.js",
-  "/api/heroes/route": "app/api/heroes/route.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/quick-test/page": "app/quick-test/page.js",
   "/page": "app/page.js",
-  "/login/page": "app/login/page.js",
-  "/register/page": "app/register/page.js"
+  "/dashboard/page": "app/dashboard/page.js"
 }
